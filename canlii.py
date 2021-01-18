@@ -103,15 +103,26 @@ else:
     db = conn.cursor()
 
 
+def fill_discoveries():
+    q = conn.cursor();
+    q.execute('SELECT * FROM decisions where fetched=0 ORDER BY hash ASC')
 
-# -----------------------------------------------------------
+    for citer in q:
+        for citee in load_decision(citer):
+            discover(citee)
+            cite(citer, citee)
+        set_fetched(citer)
 
-q = conn.cursor();
-q.execute('SELECT * FROM decisions where fetched=0 ORDER BY hash ASC')
 
-for citer in q:
-    for citee in load_decision(citer):
-        discover(citee)
-        cite(citer, citee)
-    set_fetched(citer)
+def graphviz():
+    print "digraph canlii {"
+    q = conn.cursor()
+    q.execute('SELECT hash, name FROM decisions')
+    for node in q:
+        print u'"{}" [label="{}"]'.format(node['hash'], node['name'].replace('"','\\"')).encode('utf-8')
+    q.execute('SELECT citer, citee FROM citations')
+    for node in q:
+        print u'"{}" -> "{}"'.format(node['citer'], node['citee'])
+    print "}"
 
+fill_discoveries()
