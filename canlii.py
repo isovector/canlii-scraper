@@ -5,6 +5,8 @@ import sqlite3
 from bs4 import BeautifulSoup
 import os.path
 from os import path
+import time
+import random
 
 conn= None
 db = None
@@ -146,12 +148,13 @@ def fill_discoveries():
     Find discovered decisions which haven't yet been fetched, and go and fetch them.
     """
     q = conn.cursor();
-    q.execute('SELECT * FROM decisions where fetched=0 ORDER BY hash ASC')
+    q.execute('SELECT * FROM decisions where fetched=0 ORDER BY hash DESC')
 
     # TODO(sandy): bug here; it won't fetch anything that was discovered as
     # part of ths loop
     try:
         for citer in q:
+            time.sleep(random.uniform(0.5, 2))
             for citee in get_decision_citations(citer):
                 discover(citee)
                 cite(citer, citee)
