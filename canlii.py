@@ -7,6 +7,7 @@ import os.path
 from os import path
 import time
 import random
+import threading
 
 conn= None
 
@@ -91,11 +92,12 @@ def get_scc_year(year):
         yield mk_decision(decision)
 
 
-def discover(decision):
+def discover(conn, decision):
     """
     Commit the discovery of a decision to the database.
     """
     try:
+        db = conn.cursor()
         db.execute("INSERT INTO decisions(hash, url, name, fetched) VALUES (?, ?, ?, 0)",
                     (decision['hash'], decision['url'], decision['name']))
         conn.commit()
@@ -104,29 +106,31 @@ def discover(decision):
         pass
 
 
-def load_scc_decisions():
+def load_scc_decisions(conn):
     """
     Start the database by discovering every decision made by the SCC.
     """
     for year in range(1877, 2021):
         for decision in get_scc_year(year):
-            discover(decision)
+            discover(conn, decision)
 
 
-def cite(citer, citee):
+def cite(conn, citer, citee):
     """
     Commit that 'citer' cites 'citee' in the database.
     """
+    db = conn.cursor()
     db.execute("INSERT INTO citations(citer, citee) VALUES (?, ?)",
                 (citer['hash'], citee['hash']))
     conn.commit()
     print citer['hash'] + " cites " + citee['hash']
 
 
-def set_fetched(decision):
+def set_fetched(conn, decision):
     """
     Mark a decision as having been fetched (so we don't go download it again)
     """
+    db = conn.cursor()
     db.execute("UPDATE decisions SET fetched = 1 WHERE hash = ?",
                 (decision['hash'],))
     conn.commit()
@@ -138,7 +142,6 @@ def set_fetched(decision):
 if not (path.exists('canlii.db')):
     conn = sqlite3.connect('canlii.db')
     conn.row_factory = sqlite3.Row
-    db = conn.cursor()
 
     decisions_table = """
         CREATE TABLE decisions (
@@ -159,43 +162,43 @@ if not (path.exists('canlii.db')):
         );
         """
 
+    db = conn.cursor()
     db.execute(decisions_table)
     db.execute(citations_table)
     load_scc_decisions()
 else:
     conn = sqlite3.connect('canlii.db')
     conn.row_factory = sqlite3.Row
-    db = conn.cursor()
 
 
 def fill_discoveries():
     """
     Find discovered decisions which haven't yet been fetched, and go and fetch them.
     """
-    q = conn.cursor();
-    q.execute('SELECT * FROM decisions where fetched=0 ORDER BY hash DESC')
-
-    # TODO(sandy): bug here; it won't fetch anything that was discovered as
-    # part of ths loop
-    reqs = 0
-    try:
-        for citer in q:
+    conn = sqlite3.connect('canlii.db')
+    conn.row_factory = sqlite3.Row
+    q = conn.cursor()
+    while True:
+        q.execute('SELECT * FROM decisions where fetched=0 ORDER BY RANDOM() LIMIT 1')
+        citer = q.fetchone()
+        if citer is None:
+            return
+        try:
             time.sleep(random.uniform(0.5, 5))
             for citee in get_decision_citations(citer):
-                discover(citee)
-                cite(citer, citee)
-            set_fetched(citer)
-            reqs = reqs + 1
-    except Banned:
-        print "we're banned! can't continue"
-        print "made {} reqs".format(reqs)
+                discover(conn, citee)
+                cite(conn, citer, citee)
+            set_fetched(conn, citer)
+        except Banned:
+            print "we're banned!"
 
 
-def cleanup_after_ban():
+def cleanup_after_ban(conn):
     """
     Turns out canlii will ban you if you scrape too hard. This function will
     cleanup the database so we can continue when they unban us.
     """
+    db = conn.cursor()
     db.execute("""
         UPDATE decisions
         SET fetched = 0
@@ -213,6 +216,7 @@ def graphviz():
     print "digraph canlii {"
     q = conn.cursor()
     q.execute('select citee from citations union select citer from citations;')
+    db = conn.cursor()
     for node in q:
         db.execute('select name from decisions where hash = ?', (node[0],))
         name = db.fetchone()['name']
@@ -223,5 +227,12 @@ def graphviz():
     print "}"
 
 
-fill_discoveries()
+
+for i in range(5):
+    th = threading.Thread(target=fill_discoveries)
+    th.daemon = True
+    th.start()
+
+while True:
+    time.sleep(1)
 
