@@ -32,7 +32,7 @@ def mk_decision(decision):
 class Banned : Exception
 
 
-def load_decision(decision):
+def get_decision_citations(decision):
     """
     Given a decision, go and fetch the decisions it cites, yielding each.
     """
@@ -152,7 +152,7 @@ def fill_discoveries():
     # part of ths loop
     try:
         for citer in q:
-            for citee in load_decision(citer):
+            for citee in get_decision_citations(citer):
                 discover(citee)
                 cite(citer, citee)
             set_fetched(citer)
