@@ -11,6 +11,24 @@ import random
 conn= None
 db = None
 
+headers = {
+    'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:83.0) Gecko/20100101 Firefox/83.0',
+    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+    'Accept-Encoding': 'gzip, deflate, br',
+    'Accept-Language': 'en-US,en;q=0.5',
+    'Cache-Control': 'no-cache',
+    'Connection': 'keep-alive',
+    'Cookie': 'expandResults=true',
+    'DNT': '1',
+    'Host': 'www.canlii.org',
+    'Pragma': 'no-cache',
+    'Referer': 'https://www.canlii.org/en/ca/scc/',
+    'TE': 'Trailers',
+    'Upgrade-Insecure-Requests': '1'
+}
+
+
+
 
 def mk_decision(decision):
     """
@@ -38,7 +56,8 @@ def get_decision_citations(decision):
     """
     Given a decision, go and fetch the decisions it cites, yielding each.
     """
-    page = requests.get("https://www.canlii.org" + decision['url'])
+    headers['Referer'] = 'https://www.canlii.org/en/ca/scc/' + decision['url']
+    page = requests.get("https://www.canlii.org" + decision['url'], headers=headers)
     html = BeautifulSoup(page.content, 'html.parser')
 
     are_we_banned = "Banned" in html.find("title").text or "Captcha" in html.find("title").text
