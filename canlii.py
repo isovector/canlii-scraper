@@ -170,15 +170,18 @@ def fill_discoveries():
 
     # TODO(sandy): bug here; it won't fetch anything that was discovered as
     # part of ths loop
+    reqs = 0
     try:
         for citer in q:
-            time.sleep(random.uniform(0.5, 2))
+            time.sleep(random.uniform(0.5, 5))
             for citee in get_decision_citations(citer):
                 discover(citee)
                 cite(citer, citee)
             set_fetched(citer)
+            reqs = reqs + 1
     except Banned:
         print "we're banned! can't continue"
+        print "made {} reqs".format(reqs)
 
 
 def cleanup_after_ban():
