@@ -39,7 +39,7 @@ def get_decision_citations(decision):
     page = requests.get("https://www.canlii.org" + decision['url'])
     html = BeautifulSoup(page.content, 'html.parser')
 
-    are_we_banned = "Banned" in html.find("title").text
+    are_we_banned = "Banned" in html.find("title").text or "Captcha" in html.find("title").text
     if are_we_banned:
         raise Banned
 
@@ -172,6 +172,7 @@ def cleanup_after_ban():
         AND NOT EXISTS
         (SELECT c.id FROM citations c WHERE c.citer = decisions.hash);
         """);
+    conn.commit()
 
 
 def graphviz():
