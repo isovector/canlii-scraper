@@ -27,6 +27,10 @@ headers = {
     'Upgrade-Insecure-Requests': '1'
 }
 
+proxies = {
+        'http': 'http://localhost:8443'
+}
+
 
 
 
@@ -57,7 +61,7 @@ def get_decision_citations(decision):
     Given a decision, go and fetch the decisions it cites, yielding each.
     """
     headers['Referer'] = 'https://www.canlii.org/en/ca/scc/' + decision['url']
-    page = requests.get("https://www.canlii.org" + decision['url'], headers=headers)
+    page = requests.get("https://www.canlii.org" + decision['url'], headers=headers, proxies=proxies)
     html = BeautifulSoup(page.content, 'html.parser')
 
     are_we_banned = "Banned" in html.find("title").text or "Captcha" in html.find("title").text
