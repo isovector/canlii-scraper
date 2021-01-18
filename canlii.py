@@ -129,7 +129,6 @@ def set_fetched(decision):
 # -----------------------------------------------------------
 
 if not (path.exists('canlii.db')):
-    print 'creating db'
     conn = sqlite3.connect('canlii.db')
     conn.row_factory = sqlite3.Row
     db = conn.cursor()
