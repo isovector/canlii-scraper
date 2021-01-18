@@ -29,12 +29,19 @@ def mk_decision(decision):
     return decision
 
 
+class Banned : Exception
+
+
 def load_decision(decision):
     """
     Given a decision, go and fetch the decisions it cites, yielding each.
     """
     page = requests.get("https://www.canlii.org" + decision['url'])
     html = BeautifulSoup(page.content, 'html.parser')
+
+    are_we_banned = "Banned" in html.find("title").text
+    if are_we_banned:
+        raise Banned
 
     # TODO(sandy): does this only find cited? or also citees??
     spans = html.find_all('span', class_='decision')
@@ -143,11 +150,14 @@ def fill_discoveries():
 
     # TODO(sandy): bug here; it won't fetch anything that was discovered as
     # part of ths loop
-    for citer in q:
-        for citee in load_decision(citer):
-            discover(citee)
-            cite(citer, citee)
-        set_fetched(citer)
+    try:
+        for citer in q:
+            for citee in load_decision(citer):
+                discover(citee)
+                cite(citer, citee)
+            set_fetched(citer)
+    except Banned:
+        print "we're banned! can't continue"
 
 
 def cleanup_after_ban():
@@ -177,6 +187,7 @@ def graphviz():
     for node in q:
         print u'"{}" -> "{}"'.format(node['citer'], node['citee'])
     print "}"
+
 
 fill_discoveries()
 
