@@ -11,6 +11,16 @@ db = None
 
 
 def mk_decision(decision):
+    """
+    Normalize a record into something we'll call a decision. The result should
+    have at least the following fields:
+
+    { 'hash': ...
+    , 'url':  ...
+    , 'name': ...
+    }
+
+    """
     decision['hash'] = hashlib.sha1(decision['url']).hexdigest()
     try:
         decision['name'] = decision['styleOfCause']
@@ -20,11 +30,13 @@ def mk_decision(decision):
 
 
 def load_decision(decision):
+    """
+    Given a decision, go and fetch the decisions it cites, yielding each.
+    """
     page = requests.get("https://www.canlii.org" + decision['url'])
     html = BeautifulSoup(page.content, 'html.parser')
 
-    h2 = html.find('h2', class_='mainTitle')
-
+    # TODO(sandy): does this only find cited? or also citees??
     spans = html.find_all('span', class_='decision')
     for span in spans:
         a = span.find('a', class_='canlii')
@@ -33,13 +45,21 @@ def load_decision(decision):
               , 'styleOfCause': a.text
               })
 
+
 def get_scc_year(year):
+    """
+    Given a year, yield each decision made by the supreme court that year.
+    """
     page = requests.get("https://www.canlii.org/en/ca/scc/nav/date/{}/items".format(year))
     decisions = json.loads(page.content)
     for decision in decisions:
         yield mk_decision(decision)
 
+
 def discover(decision):
+    """
+    Commit the discovery of a decision to the database.
+    """
     try:
         db.execute("INSERT INTO decisions(hash, url, name, fetched) VALUES (?, ?, ?, 0)",
                     (decision['hash'], decision['url'], decision['name']))
@@ -50,17 +70,28 @@ def discover(decision):
 
 
 def load_scc_decisions():
+    """
+    Start the database by discovering every decision made by the SCC.
+    """
     for year in range(1877, 2021):
         for decision in get_scc_year(year):
             discover(decision)
 
+
 def cite(citer, citee):
+    """
+    Commit that 'citer' cites 'citee' in the database.
+    """
     db.execute("INSERT INTO citations(citer, citee) VALUES (?, ?)",
                 (citer['hash'], citee['hash']))
     conn.commit()
     print citer['hash'] + " cites " + citee['hash']
 
+
 def set_fetched(decision):
+    """
+    Mark a decision as having been fetched (so we don't go download it again)
+    """
     db.execute("UPDATE decisions SET fetched = 1 WHERE hash = ?",
                 (decision['hash'],))
     conn.commit()
@@ -104,9 +135,14 @@ else:
 
 
 def fill_discoveries():
+    """
+    Find discovered decisions which haven't yet been fetched, and go and fetch them.
+    """
     q = conn.cursor();
     q.execute('SELECT * FROM decisions where fetched=0 ORDER BY hash ASC')
 
+    # TODO(sandy): bug here; it won't fetch anything that was discovered as
+    # part of ths loop
     for citer in q:
         for citee in load_decision(citer):
             discover(citee)
@@ -115,6 +151,10 @@ def fill_discoveries():
 
 
 def cleanup_after_ban():
+    """
+    Turns out canlii will ban you if you scrape too hard. This function will
+    cleanup the database so we can continue when they unban us.
+    """
     db.execute("""
         UPDATE decisions
         SET fetched = 0
@@ -125,6 +165,9 @@ def cleanup_after_ban():
 
 
 def graphviz():
+    """
+    Produce a graphviz dot file from the database.
+    """
     print "digraph canlii {"
     q = conn.cursor()
     q.execute('SELECT hash, name FROM decisions')
@@ -136,3 +179,4 @@ def graphviz():
     print "}"
 
 fill_discoveries()
+
