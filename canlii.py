@@ -114,6 +114,16 @@ def fill_discoveries():
         set_fetched(citer)
 
 
+def cleanup_after_ban():
+    db.execute("""
+        UPDATE decisions
+        SET fetched = 0
+        WHERE fetched = 1
+        AND NOT EXISTS
+        (SELECT c.id FROM citations c WHERE c.citer = decisions.hash);
+        """);
+
+
 def graphviz():
     print "digraph canlii {"
     q = conn.cursor()
