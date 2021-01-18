@@ -184,9 +184,11 @@ def graphviz():
     """
     print "digraph canlii {"
     q = conn.cursor()
-    q.execute('SELECT hash, name FROM decisions')
+    q.execute('select citee from citations union select citer from citations;')
     for node in q:
-        print u'"{}" [label="{}"]'.format(node['hash'], node['name'].replace('"','\\"')).encode('utf-8')
+        db.execute('select name from decisions where hash = ?', (node[0],))
+        name = db.fetchone()['name']
+        print u'"{}" [label="{}"]'.format(node[0], name.replace('"','\\"')).encode('utf-8')
     q.execute('SELECT citer, citee FROM citations')
     for node in q:
         print u'"{}" -> "{}"'.format(node['citer'], node['citee'])
