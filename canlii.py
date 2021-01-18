@@ -9,7 +9,6 @@ import time
 import random
 
 conn= None
-db = None
 
 headers = {
     'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:83.0) Gecko/20100101 Firefox/83.0',
@@ -22,13 +21,13 @@ headers = {
     'DNT': '1',
     'Host': 'www.canlii.org',
     'Pragma': 'no-cache',
-    'Referer': 'https://www.canlii.org/en/ca/scc/',
+    'Referer': 'http://www.canlii.org/en/ca/scc/',
     'TE': 'Trailers',
     'Upgrade-Insecure-Requests': '1'
 }
 
 proxies = {
-        'http': 'http://localhost:8443'
+    'http': 'http://localhost:8443'
 }
 
 
@@ -60,11 +59,15 @@ def get_decision_citations(decision):
     """
     Given a decision, go and fetch the decisions it cites, yielding each.
     """
-    headers['Referer'] = 'https://www.canlii.org/en/ca/scc/' + decision['url']
-    page = requests.get("https://www.canlii.org" + decision['url'], headers=headers, proxies=proxies)
+    headers['Referer'] = 'http://www.canlii.org/en/ca/scc/' + decision['url']
+    page = requests.get("http://www.canlii.org" + decision['url'], headers=headers, proxies=proxies)
     html = BeautifulSoup(page.content, 'html.parser')
 
-    are_we_banned = "Banned" in html.find("title").text or "Captcha" in html.find("title").text
+    title = html.find("title")
+    if title is None:
+        raise Banned
+
+    are_we_banned = "Banned" in title.text or "Captcha" in title.text
     if are_we_banned:
         raise Banned
 
@@ -82,7 +85,7 @@ def get_scc_year(year):
     """
     Given a year, yield each decision made by the supreme court that year.
     """
-    page = requests.get("https://www.canlii.org/en/ca/scc/nav/date/{}/items".format(year))
+    page = requests.get("http://www.canlii.org/en/ca/scc/nav/date/{}/items".format(year))
     decisions = json.loads(page.content)
     for decision in decisions:
         yield mk_decision(decision)
