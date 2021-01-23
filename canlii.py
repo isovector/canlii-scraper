@@ -16,34 +16,46 @@ import os
 #     from PIL import Image
 
 agents = [
-        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36 Edge/12.246'
-        # 'Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 Mobile/15A372 Safari/604.1'
-    # 'Mozilla/5.0 (Linux; Android 8.0.0; SM-G960F Build/R16NW) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.84 Mobile Safari/537.36',
-    # 'Mozilla/5.0 (Linux; Android 7.0; SM-G892A Build/NRD90M; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/60.0.3112.107 Mobile Safari/537.36',
-    # 'Mozilla/5.0 (Linux; Android 7.0; SM-G930VC Build/NRD90M; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/58.0.3029.83 Mobile Safari/537.36',
-    # 'Mozilla/5.0 (Linux; Android 6.0.1; SM-G935S Build/MMB29K; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/55.0.2883.91 Mobile Safari/537.36',
-    # 'Mozilla/5.0 (Linux; Android 6.0.1; SM-G920V Build/MMB29K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.98 Mobile Safari/537.36',
-    # 'Mozilla/5.0 (Linux; Android 5.1.1; SM-G928X Build/LMY47X) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.83 Mobile Safari/537.36',
-    # 'Mozilla/5.0 (Linux; Android 6.0.1; Nexus 6P Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.83 Mobile Safari/537.36',
-    # 'Mozilla/5.0 (Linux; Android 7.1.1; G8231 Build/41.2.A.0.219; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/59.0.3071.125 Mobile Safari/537.36',
-    # 'Mozilla/5.0 (Linux; Android 6.0.1; E6653 Build/32.2.A.0.253) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.98 Mobile Safari/537.36',
-    # 'Mozilla/5.0 (Linux; Android 6.0; HTC One X10 Build/MRA58K; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/61.0.3163.98 Mobile Safari/537.36',
-    # 'Mozilla/5.0 (Linux; Android 6.0; HTC One M9 Build/MRA58K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.98 Mobile Safari/537.3',
+        'Mozilla/5.0 (Macintosh; Android 4.4.3; KFTHWI Build/KTU84M) AppleWebKit/537.36 (KHTML, like Gecko) Silk/47.1.79 like Chrome/47.0.2526.80 Safari/537.36'
+    'Mozilla/6.0 (Linux; Android 7.0.1; SGP771 Build/32.2.A.0.253; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/52.0.2743.98 Safari/537.36',
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_2) AppleWebKit/601.3.9 (KHTML, like Gecko) Version/9.0.2 Safari/601.3.9',
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36 Edge/12.246',
+    'Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 Mobile/15A372 Safari/604.1',
+    'Mozilla/5.0 (Linux; Android 8.0.0; SM-G960F Build/R16NW) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.84 Mobile Safari/537.36',
+    'Mozilla/5.0 (Linux; Android 7.0; SM-G892A Build/NRD90M; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/60.0.3112.107 Mobile Safari/537.36',
+    'Mozilla/5.0 (Linux; Android 7.0; SM-G930VC Build/NRD90M; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/58.0.3029.83 Mobile Safari/537.36',
+    'Mozilla/5.0 (Linux; Android 6.0.1; SM-G935S Build/MMB29K; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/55.0.2883.91 Mobile Safari/537.36',
+    'Mozilla/5.0 (Linux; Android 6.0.1; SM-G920V Build/MMB29K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.98 Mobile Safari/537.36',
+    'Mozilla/5.0 (Linux; Android 5.1.1; SM-G928X Build/LMY47X) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.83 Mobile Safari/537.36',
+    'Mozilla/5.0 (Linux; Android 6.0.1; Nexus 6P Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.83 Mobile Safari/537.36',
+    'Mozilla/5.0 (Linux; Android 7.1.1; G8231 Build/41.2.A.0.219; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/59.0.3071.125 Mobile Safari/537.36',
+    'Mozilla/5.0 (Linux; Android 6.0.1; E6653 Build/32.2.A.0.253) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.98 Mobile Safari/537.36',
+    'Mozilla/5.0 (Linux; Android 6.0; HTC One X10 Build/MRA58K; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/61.0.3163.98 Mobile Safari/537.36',
+    'Mozilla/5.0 (Linux; Android 6.0; HTC One M9 Build/MRA58K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.98 Mobile Safari/537.3',
+    'Mozilla/6.0 (IPhone; CPU iPhone OS 12_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/12.0 Mobile/15E148 Safari/604.1',
+    'Mozilla/6.0 (IPhone; CPU iPhone OS 12_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/69.0.3497.105 Mobile/15E148 Safari/605.1',
+    'Mozilla/6.0 (IPhone; CPU iPhone OS 12_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) FxiOS/13.2b11866 Mobile/16A366 Safari/605.1.15',
+    'Mozilla/6.0 (IPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 Mobile/15A372 Safari/604.1',
+    'Mozilla/6.0 (IPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.34 (KHTML, like Gecko) Version/11.0 Mobile/15A5341f Safari/604.1',
+    'Mozilla/6.0 (IPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 Mobile/15A5370a Safari/604.1',
+    'Mozilla/6.0 (IPhone9,3; U; CPU iPhone OS 10_0_1 like Mac OS X) AppleWebKit/602.1.50 (KHTML, like Gecko) Version/10.0 Mobile/14A403 Safari/602.1',
+    'Mozilla/6.0 (iPhone9,4; U; CPU iPhone OS 10_0_1 like Mac OS X) AppleWebKit/602.1.50 (KHTML, like Gecko) Version/10.0 Mobile/14A403 Safari/602.1',
+    'Mozilla/6.0 (Apple-IPhone7C2/1202.466; U; CPU like Mac OS X; en) AppleWebKit/420+ (KHTML, like Gecko) Version/3.0 Mobile/1A543 Safari/419.3',
 ]
 
 headers = {
     'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:83.0) Gecko/20100101 Firefox/83.0',
-    'Accept': 'text/html', # ,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-    'Accept-Encoding': 'gzip, deflate, br',
-    'Accept-Language': 'en-US,en;q=0.5',
+    'Accept': 'text/html,text/xml;q=0.10,*/*',
+    'Accept-Encoding': 'gz2, gzip, deflate',
+    'Accept-Language': 'en, es',
     'Cache-Control': 'no-cache',
     'Connection': 'keep-alive',
     'Cookie': 'expandResults=true',
-    'DNT': '1',
+    # 'DNT': '1',
     'Host': 'www.canlii.org',
     'Pragma': 'no-cache',
-    'Referer': 'http://www.canlii.org/en/ca/scc/',
-    'TE': 'Trailers',
+    'Referer': 'https://google.com?q=scc',
+    # 'TE': 'Trailers',
     'Upgrade-Insecure-Requests': '1'
 }
 
@@ -82,8 +94,9 @@ class NoHtml(BaseException):
 
 def fetch(url):
     hs = headers
-    hs['Referer'] = 'http://www.canlii.org' + url
+    # hs['Referer'] = 'http://www.canlii.org' + url
     hs['User-Agent'] = random.choice(agents)
+    print("fetching " + url)
     page = requests.get("http://www.canlii.org" + url, headers=hs, proxies=proxies)
     return page
 
@@ -156,7 +169,7 @@ def cite(conn, citer, citee):
     db.execute("INSERT INTO citations(citer, citee) VALUES (?, ?)",
                 (citer['hash'], citee['hash']))
     conn.commit()
-    print( citer['hash'] + " cites " + citee['hash'])
+    # print( citer['hash'] + " cites " + citee['hash'])
 
 
 def set_fetched(conn, decision):
@@ -212,12 +225,13 @@ def fill_discoveries():
     conn.row_factory = sqlite3.Row
     q = conn.cursor()
     while True:
-        q.execute('SELECT * FROM decisions where hash = (SELECT citee FROM (SELECT citee, count (*) AS count FROM citations WHERE citee IN (SELECT hash FROM decisions WHERE url LIKE "%scc%" AND fetched = 0) GROUP BY citee ORDER BY count DESC LIMIT 1));')
+        # q.execute('SELECT * FROM decisions WHERE url LIKE "%scc%" AND fetched = 0')
+        q.execute('select * from decisions where hash = (select citee from (select citee, count (*) as count FROM citations WHERE citee in (select hash from decisions where url not like "/fr/%" and fetched = 0) GROUP BY citee ORDER BY count desc LIMIT 1));')
         citer = q.fetchone()
         if citer is None:
             return
         try:
-            time.sleep(random.uniform(3, 25))
+            # time.sleep(random.uniform(5, 30))
             for citee in get_decision_citations(citer):
                 discover(conn, citee)
                 cite(conn, citer, citee)
@@ -227,9 +241,10 @@ def fill_discoveries():
         except Banned:
             print( "we're banned")
         except Captcha:
-            os.system('notify-send "Captcha time" "Go do it yo"')
-            os.system('xdg-open "https://www.canlii.org/" &')
-            time.sleep(30)
+            print( "captcha'd")
+            # os.system('notify-send "Captcha time" "Go do it yo"')
+            # os.system('xdg-open "https://www.canlii.org/" &')
+            # time.sleep(30)
 
             # raw_input()
 
