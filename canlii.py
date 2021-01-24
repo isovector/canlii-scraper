@@ -96,7 +96,7 @@ def fetch(url):
     hs = headers
     # hs['Referer'] = 'http://www.canlii.org' + url
     hs['User-Agent'] = random.choice(agents)
-    print("fetching " + url)
+    # print("fetching " + url)
     page = requests.get("http://www.canlii.org" + url, headers=hs, proxies=proxies)
     return page
 
