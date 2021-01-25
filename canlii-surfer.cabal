@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: f2e7b41d30b336409a1d88f78b1ec82ebd820ba4abc188e27192f5eeb2e48165
+-- hash: 184690596ec89ceb1fbceb481aa9bb6b3d93354728d387273dcc1d06e042fa6c
 
 name:           canlii-surfer
 version:        0.1.0.0
@@ -34,6 +34,8 @@ library
       src
   build-depends:
       base >=4.7 && <5
+    , containers
+    , random
     , text
     , webdriver
   default-language: Haskell2010
@@ -48,6 +50,8 @@ executable canlii-surfer-exe
   build-depends:
       base >=4.7 && <5
     , canlii-surfer
+    , containers
+    , random
     , text
     , webdriver
   default-language: Haskell2010
@@ -63,6 +67,8 @@ test-suite canlii-surfer-test
   build-depends:
       base >=4.7 && <5
     , canlii-surfer
+    , containers
+    , random
     , text
     , webdriver
   default-language: Haskell2010
