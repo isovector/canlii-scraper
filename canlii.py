@@ -96,7 +96,7 @@ def fetch(url):
     hs = headers
     # hs['Referer'] = 'http://www.canlii.org' + url
     hs['User-Agent'] = random.choice(agents)
-    # print("fetching " + url)
+    print("fetching " + url)
     page = requests.get("http://www.canlii.org" + url, headers=hs, proxies=proxies)
     return page
 
@@ -128,11 +128,20 @@ def get_decision_citations(decision):
               })
 
 
-def get_scc_year(year):
+def get_court_active_years(province, court):
+    page = fetch("/en/{}/{}/".format(province, court))
+    html = BeautifulSoup(page.content, 'html.parser')
+    years = html.find_all('option')
+    for year in years:
+        if year.has_attr('value'):
+            yield year['value']
+
+
+def get_court_year(court_year):
     """
     Given a year, yield each decision made by the supreme court that year.
     """
-    page = requests.get("http://www.canlii.org/en/ca/scc/nav/date/{}/items".format(year))
+    page = fetch("{}items".format(court_year))
     decisions = json.loads(page.content)
     for decision in decisions:
         yield mk_decision(decision)
@@ -152,12 +161,12 @@ def discover(conn, decision):
         pass
 
 
-def load_scc_decisions(conn):
+def load_court_decisions(conn, province, court):
     """
     Start the database by discovering every decision made by the SCC.
     """
-    for year in range(1877, 2021):
-        for decision in get_scc_year(year):
+    for court_year in get_court_active_years(province, court):
+        for decision in get_court_year(court_year):
             discover(conn, decision)
 
 
@@ -169,7 +178,7 @@ def cite(conn, citer, citee):
     db.execute("INSERT INTO citations(citer, citee) VALUES (?, ?)",
                 (citer['hash'], citee['hash']))
     conn.commit()
-    # print( citer['hash'] + " cites " + citee['hash'])
+    print( citer['hash'] + " cites " + citee['hash'])
 
 
 def set_fetched(conn, decision):
@@ -231,7 +240,7 @@ def fill_discoveries():
         if citer is None:
             return
         try:
-            # time.sleep(random.uniform(5, 30))
+            time.sleep(random.uniform(1, 5))
             for citee in get_decision_citations(citer):
                 discover(conn, citee)
                 cite(conn, citer, citee)
@@ -284,6 +293,13 @@ def graphviz():
         print( u'"{}" -> "{}"'.format(node['citer'], node['citee']))
     print ("}")
 
+
+# conn = sqlite3.connect('canlii.db')
+# conn.row_factory = sqlite3.Row
+
+# provinces = ['bc', 'qc', 'ab', 'sk', 'mb', 'nb', 'ns', 'pe', 'nl']
+# for province in provinces:
+#     load_court_decisions(conn, province, province + "ca")
 
 for i in range(1):
     th = threading.Thread(target=fill_discoveries)
