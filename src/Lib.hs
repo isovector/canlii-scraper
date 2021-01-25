@@ -42,7 +42,7 @@ prog = do
           liftIO $ randomRIO (5e6, 20e6) >>= threadDelay
 
 
-alt :: WD (Set a) -> WD (Set a) -> WD (Set a)
+alt :: Monad m => m (Set a) -> m (Set a) -> m (Set a)
 alt ma mb = do
   sa <- ma
   case S.null sa of
