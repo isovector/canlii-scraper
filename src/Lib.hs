@@ -33,9 +33,13 @@ prog = do
   openPage "https://www.canlii.org/en/ca/scc/doc/2020/2020scc39/2020scc39.html"
   forever $ do
     els <- useCited `alt` useCitedBy
-    el <- liftIO $ randomElement els
-    click el
-    liftIO $ randomRIO (5e6, 20e6) >>= threadDelay
+    liftIO $ threadDelay 1e6
+    if S.null els
+       then back
+       else do
+          el <- liftIO $ randomElement els
+          click el
+          liftIO $ randomRIO (5e6, 20e6) >>= threadDelay
 
 
 alt :: WD (Set a) -> WD (Set a) -> WD (Set a)
