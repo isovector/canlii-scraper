@@ -1,3 +1,4 @@
+from datetime import datetime
 import requests
 import json
 import hashlib
@@ -156,7 +157,7 @@ def discover(conn, decision):
         db.execute("INSERT INTO decisions(hash, url, name, fetched) VALUES (?, ?, ?, 0)",
                     (decision['hash'], decision['url'], decision['name']))
         conn.commit()
-        print( "discovered " + decision['name'])
+        # print( "discovered " + decision['name'])
     except:
         pass
 
@@ -178,7 +179,7 @@ def cite(conn, citer, citee):
     db.execute("INSERT INTO citations(citer, citee) VALUES (?, ?)",
                 (citer['hash'], citee['hash']))
     conn.commit()
-    print( citer['hash'] + " cites " + citee['hash'])
+    # print( citer['hash'] + " cites " + citee['hash'])
 
 
 def set_fetched(conn, decision):
@@ -189,7 +190,7 @@ def set_fetched(conn, decision):
     db.execute("UPDATE decisions SET fetched = 1 WHERE hash = ?",
                 (decision['hash'],))
     conn.commit()
-    print( "marking " + decision['hash'] + " as fetched")
+    # print( "marking " + decision['hash'] + " as fetched")
 
 
 # -----------------------------------------------------------
@@ -233,14 +234,22 @@ def fill_discoveries():
     conn = sqlite3.connect('canlii.db')
     conn.row_factory = sqlite3.Row
     q = conn.cursor()
+    i = 0
     while True:
-        # q.execute('SELECT * FROM decisions WHERE url LIKE "%scc%" AND fetched = 0')
-        q.execute('select * from decisions where hash = (select citee from (select citee, count (*) as count FROM citations WHERE citee in (select hash from decisions where url not like "/fr/%" and fetched = 0) GROUP BY citee ORDER BY count desc LIMIT 1));')
+        i = i + 1
+        if i % 3 == 0:
+            q.execute('select * from decisions where hash = (select citee from (select citee, count (*) as count FROM citations WHERE citee in (select hash from decisions where url not like "/fr/%" and fetched = 0) GROUP BY citee ORDER BY count desc LIMIT 1));')
+        elif i % 3 == 1:
+            q.execute('select * from decisions where url not like "/fr/%" and fetched = 0 order by random() limit 1;')
+        else:
+            q.execute('select * from decisions where url not like "/fr/%" and url like "%ca/%" and fetched = 0 order by random() limit 1;')
+
+
         citer = q.fetchone()
         if citer is None:
             return
         try:
-            time.sleep(random.uniform(1, 5))
+            # time.sleep(random.uniform(2, 6))
             for citee in get_decision_citations(citer):
                 discover(conn, citee)
                 cite(conn, citer, citee)
@@ -251,6 +260,8 @@ def fill_discoveries():
             print( "we're banned")
         except Captcha:
             print( "captcha'd")
+            print(datetime.now().strftime("%H:%M:%S"))
+            return
             # os.system('notify-send "Captcha time" "Go do it yo"')
             # os.system('xdg-open "https://www.canlii.org/" &')
             # time.sleep(30)
