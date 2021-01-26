@@ -1,3 +1,4 @@
+{-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE NumDecimals       #-}
 {-# LANGUAGE LambdaCase        #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -18,6 +19,9 @@ import Data.Traversable (for)
 import Debug.Trace (traceM)
 import System.Random
 import Data.Foldable
+import Data.Char (isDigit)
+import Data.Bifunctor (Bifunctor(bimap))
+import Data.Bitraversable (bisequence)
 
 
 
@@ -32,14 +36,14 @@ prog :: WD ()
 prog = do
   openPage "https://www.canlii.org/en/ca/scc/doc/2020/2020scc39/2020scc39.html"
   forever $ do
-    els <- useCited `alt` useCitedBy
+    els <- useBiggerTab
     liftIO $ threadDelay 1e6
     if S.null els
        then back
        else do
           el <- liftIO $ randomElement els
           click el
-          liftIO $ randomRIO (5e6, 20e6) >>= threadDelay
+          liftIO $ randomRIO (2e6, 15e6) >>= threadDelay
 
 
 alt :: Monad m => m (Set a) -> m (Set a) -> m (Set a)
@@ -50,14 +54,20 @@ alt ma mb = do
     True -> mb
 
 
+useBiggerTab :: WD (Set Element)
+useBiggerTab = do
+  cited_sz    <- getTabSize "cited-tab"
+  cited_by_sz <- getTabSize "treatment-tab"
+
+  fmap (either id id) $ bisequence $ bimap useCited useCitedBy $ useBigger cited_sz cited_by_sz
 
 
-useCited :: WD (Set Element)
-useCited = useTab "cited-tab" "citedContent" "decision"
+useCited :: Element -> WD (Set Element)
+useCited = useTab "citedContent" "decision"
 
 
-useCitedBy :: WD (Set Element)
-useCitedBy = useTab "treatment-tab" "citedBy" "name"
+useCitedBy :: Element -> WD (Set Element)
+useCitedBy = useTab "citedBy" "name"
 
 
 randomElement :: Foldable t => t a -> IO a
@@ -67,19 +77,42 @@ randomElement t = do
   n <- randomRIO (0, len - 1)
   pure $ els !! n
 
+useBigger :: Maybe (Int, a) -> Maybe (Int, b) -> Either a b
+useBigger (Just (_, e)) Nothing = Left e
+useBigger Nothing (Just (_, e)) = Right e
+useBigger (Just (s1, e1)) (Just (s2, e2)) =
+  if s1 > s2
+     then Left e1
+     else Right e2
+useBigger _ _ = error "use bigger but nothing"
 
-useTab :: Text -> Text -> Text -> WD (Set Element)
-useTab tab cid cls = do
-  clickTab tab
+
+useTab :: Text -> Text -> Element -> WD (Set Element)
+useTab cid cls tab = do
+  click tab
   liftIO $ threadDelay 2e6
   getSelfLinks cid cls
+
+
+getTabSize :: Text -> WD (Maybe (Int, Element))
+getTabSize tab_id = do
+  findElemMaybe (ByCSS $ "#" <> tab_id <> ":not(.disabled)" ) >>= \case
+    Just tab_a -> do
+      txt <- getText tab_a
+      let size = read @Int $ filter isDigit $ T.unpack txt
+      pure $ Just (size, tab_a)
+    Nothing    -> pure Nothing
 
 
 
 clickTab :: Text -> WD ()
 clickTab tab_id = do
   findElemMaybe (ByCSS $ "#" <> tab_id <> ":not(.disabled)" ) >>= \case
-    Just tab_a -> click tab_a
+    Just tab_a -> do
+      txt <- getText tab_a
+      let x = read @Int $ filter isDigit $ T.unpack txt
+      liftIO $ print x
+      click tab_a
     Nothing    -> pure ()
 
 
