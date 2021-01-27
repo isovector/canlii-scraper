@@ -249,7 +249,7 @@ def fill_discoveries():
         if citer is None:
             return
         try:
-            # time.sleep(random.uniform(2, 6))
+            time.sleep(random.uniform(2, 6))
             for citee in get_decision_citations(citer):
                 discover(conn, citee)
                 cite(conn, citer, citee)
@@ -312,11 +312,13 @@ def graphviz():
 # for province in provinces:
 #     load_court_decisions(conn, province, province + "ca")
 
-for i in range(1):
-    th = threading.Thread(target=fill_discoveries)
-    th.daemon = True
-    th.start()
+fill_discoveries()
 
-while True:
-    time.sleep(1)
+# for i in range(1):
+#     th = threading.Thread(target=fill_discoveries)
+#     th.daemon = True
+#     th.start()
+
+# while True:
+#     time.sleep(1)
 
