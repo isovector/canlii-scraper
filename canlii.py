@@ -249,7 +249,7 @@ def fill_discoveries():
         if citer is None:
             return
         try:
-            time.sleep(random.uniform(2, 6))
+            # time.sleep(random.uniform(2, 6))
             for citee in get_decision_citations(citer):
                 discover(conn, citee)
                 cite(conn, citer, citee)
