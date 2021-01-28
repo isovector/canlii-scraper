@@ -8,6 +8,7 @@ while :; do
   stack run &
   sleep 2s
   python2 canlii.py
+  wmctrl -c "| CanLII"
   pkill canlii
   pkill java
 done
