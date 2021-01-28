@@ -34,7 +34,7 @@ main = runSession conf . finallyClose $ prog
 
 prog :: WD ()
 prog = do
-  openPage "https://www.canlii.org/en/ca/scc/doc/2020/2020scc39/2020scc39.html"
+  openPage "https://www.canlii.org/en/ca/scc/doc/1986/1986canlii46/1986canlii46.html"
   forever $ do
     els <- useBiggerTab
     liftIO $ threadDelay 1e6
