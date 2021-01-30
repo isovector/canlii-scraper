@@ -123,10 +123,11 @@ def get_decision_citations(decision):
     spans = html.find_all('span', class_='decision')
     for span in spans:
         a = span.find('a', class_='canlii')
-        yield mk_decision(
-              { 'url': a['href']
-              , 'styleOfCause': a.text
-              })
+        if a is not None and a.has_attr('href'):
+            yield mk_decision(
+                { 'url': a['href']
+                , 'styleOfCause': a.text
+                })
 
 
 def get_court_active_years(province, court):
