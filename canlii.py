@@ -237,13 +237,14 @@ def fill_discoveries():
     q = conn.cursor()
     i = 0
     while True:
+        q.execute('select * from decisions where hash = (select citee from (select citee, count (*) as count FROM citations WHERE citee in (select hash from decisions where url not like "/fr/%" and fetched = 0) GROUP BY citee ORDER BY count desc LIMIT 1));')
         i = i + 1
-        if i % 3 == 0:
-            q.execute('select * from decisions where hash = (select citee from (select citee, count (*) as count FROM citations WHERE citee in (select hash from decisions where url not like "/fr/%" and fetched = 0) GROUP BY citee ORDER BY count desc LIMIT 1));')
-        elif i % 3 == 1:
-            q.execute('select * from decisions where url not like "/fr/%" and fetched = 0 order by random() limit 1;')
-        else:
-            q.execute('select * from decisions where url not like "/fr/%" and url like "%ca/%" and fetched = 0 order by random() limit 1;')
+        # if i % 3 == 0:
+        #     q.execute('select * from decisions where hash = (select citee from (select citee, count (*) as count FROM citations WHERE citee in (select hash from decisions where url not like "/fr/%" and fetched = 0) GROUP BY citee ORDER BY count desc LIMIT 1));')
+        # elif i % 3 == 1:
+        #     q.execute('select * from decisions where url not like "/fr/%" and fetched = 0 order by random() limit 1;')
+        # else:
+        #     q.execute('select * from decisions where url not like "/fr/%" and url like "%ca/%" and fetched = 0 order by random() limit 1;')
 
 
         citer = q.fetchone()
@@ -259,6 +260,8 @@ def fill_discoveries():
             print( "network error")
         except Banned:
             print( "we're banned")
+            print(datetime.now().strftime("%H:%M:%S"))
+            return
         except Captcha:
             print( "captcha'd")
             print(datetime.now().strftime("%H:%M:%S"))
