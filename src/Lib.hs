@@ -36,6 +36,8 @@ prog :: WD ()
 prog = do
   openPage "https://www.canlii.org/en/ca/scc/doc/1986/1986canlii46/1986canlii46.html"
   forever $ do
+    url <- getCurrentURL
+    liftIO $ print url
     els <- useBiggerTab
     liftIO $ threadDelay 1e6
     if S.null els
@@ -59,7 +61,9 @@ useBiggerTab = do
   cited_sz    <- getTabSize "cited-tab"
   cited_by_sz <- getTabSize "treatment-tab"
 
-  fmap (either id id) $ bisequence $ bimap useCited useCitedBy $ useBigger cited_sz cited_by_sz
+  case useBigger cited_sz cited_by_sz of
+    Nothing -> back >> useBiggerTab
+    Just x -> fmap (either id id) $ bisequence $ bimap useCited useCitedBy x
 
 
 useCited :: Element -> WD (Set Element)
@@ -77,14 +81,14 @@ randomElement t = do
   n <- randomRIO (0, len - 1)
   pure $ els !! n
 
-useBigger :: Maybe (Int, a) -> Maybe (Int, b) -> Either a b
-useBigger (Just (_, e)) Nothing = Left e
-useBigger Nothing (Just (_, e)) = Right e
-useBigger (Just (s1, e1)) (Just (s2, e2)) =
+useBigger :: Maybe (Int, a) -> Maybe (Int, b) -> Maybe (Either a b)
+useBigger (Just (_, e)) Nothing = Just $ Left e
+useBigger Nothing (Just (_, e)) = Just $ Right e
+useBigger (Just (s1, e1)) (Just (s2, e2)) = Just $
   if s1 > s2
      then Left e1
      else Right e2
-useBigger _ _ = error "use bigger but nothing"
+useBigger _ _ = Nothing
 
 
 useTab :: Text -> Text -> Element -> WD (Set Element)
